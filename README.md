@@ -4,12 +4,13 @@ Goupille
 [![GoDoc](https://godoc.org/github.com/azr/goupille?status.png)](https://godoc.org/github.com/azr/goupille)
 [![Build Status](https://travis-ci.org/azr/goupille.svg?branch=master)](https://travis-ci.org/azr/goupille)
 
+This package it is intended for you to make
+sure every goroutine left after anyone pulled the pin.
+
 **Goupille** is the french for a grenade's pin.
 
 Pull the pin, throw stuff and run.
 
-This package it is intended for you to make
-sure every goroutine left after anyone pulled the pin.
 
 It is pretty convenient when you have multiple goroutines
 doing things and one of them could fail. So you

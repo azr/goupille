@@ -1,0 +1,8 @@
+language: go
+go:
+  - 1.3
+  - 1.4
+  - release
+env:
+  global:
+    secure: oinDOcxfLucbpewKIEvjv53LmC0NOVMGwVHSlAxo2HjmQyHELawZUrR40fUMg3Dm3XvCuV+GjlkLLzukeqctdhzoUUuWjvStlV7OrpqB4Ir61Dqa/rcpagYD7IleyeXvXAXxsjUONlcd363z3E82WirFkbAs3dV451OQjghGGes=

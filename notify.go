@@ -14,8 +14,13 @@ func (g *Pin) Notify(sig ...os.Signal) {
 	c := make(chan os.Signal)
 	signal.Notify(c, sig...)
 	go func() {
+		n := 0
 		for sig := range c {
+			if n == 1 {
+				panic("got too many signals")
+			}
 			g.Pull(fmt.Errorf("Recieved signal %s", sig))
+			n++
 		}
 	}()
 }

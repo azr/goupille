@@ -1,17 +1,24 @@
-// Goupille is the french for a grenade's pin.
+// A simple termination tool.
 //
-// Pull the pin, throw stuff and run.
+// Put is simple:
+//
+// 1. Everything is fine in a perfect world.
+//
+// 2. Problem
+//
+// 3. Pull the goupille and leave
 //
 // This package it is intended for you to make
 // sure every goroutine left after anyone pulled the pin, simply.
 //
 // It is pretty convenient when you have multiple goroutines
-// doing things and one of them could fail. So you
-// can make sure everyone says goodbye before leaving, and then shut down properly.
+// doing things and one of them could fail, or you are juste tired of things running.
+//
+// So you can make sure everyone says goodbye before leaving, and then shut down properly.
 //
 // Goupille is meant to be used as an interface, you can have your own implementation of it and use it everywhere.
 //
-// For example, my implementation (Pin) starts handling system os.Signal with Notify.
+// For example, my implementation (Pin) will start handling system os.Signal if you call Notify and leave on notice.
 package goupille
 
 import (

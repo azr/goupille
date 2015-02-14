@@ -3,7 +3,7 @@
 // Pull the pin, throw stuff and run.
 //
 // This package it is intended for you to make
-// sure every goroutine left after anyone pulled the pin.
+// sure every goroutine left after anyone pulled the pin, simply.
 //
 // It is pretty convenient when you have multiple goroutines
 // doing things and one of them could fail. So you
@@ -15,63 +15,52 @@
 package goupille
 
 import (
-	"os"
-	"os/signal"
 	"sync"
 )
 
 type Goupille interface {
 
-	//1 Attatch a goroutine to it
-	Attach()
+	// Add a worker
+	Add()
 
-	//2 Something went wrong, let's pull the goupille
-	//  ( you should also throw the grenade)
-	Pull(reason Stringer)
+	// Call Pull to tell everyone something went wrong
+	Pull(reason error)
 
-	//3 tell everyone the chemical reaction started
+	// if this is triggered, it means you should leave if possible
 	Tick() chan struct{}
 
-	//4 yay that goroutine left
-	Detach()
+	// Done working
+	Done()
 
-	//5 a true hero waits for everyone before leaving
-	Wait() Stringer
-}
-
-//Stringer is already definer in fmt !
-//but a real Goupille doesn't need fmt,
-//question de fierté.
-type Stringer interface {
-	String() string
+	// a true hero waits for everyone before leaving
+	Wait() error
 }
 
 //My version of la goupille
 type Pin struct {
-	m       sync.Mutex
-	g       sync.WaitGroup
-	waiting chan struct{}
-	reason  Stringer
+	m      sync.Mutex
+	g      sync.WaitGroup
+	dying  chan struct{}
+	reason error
 }
 
 // New safety Pin !
 func New() *Pin {
 	return &Pin{
-		m:       sync.Mutex{},
-		g:       sync.WaitGroup{},
-		waiting: nil,
-		reason:  nil,
+		m:      sync.Mutex{},
+		g:      sync.WaitGroup{},
+		dying:  nil,
+		reason: nil,
 	}
 }
 
-// Attach a string to the Pin.
-// Remember, if you pull it, start leaving
-func (g *Pin) Attach() {
+// Add a worker
+func (g *Pin) Add() {
 	g.g.Add(1)
 }
 
-// Cuts the string (please use legs to run away)
-func (g *Pin) Detach() {
+// Worker finished
+func (g *Pin) Done() {
 	g.g.Done()
 }
 
@@ -79,7 +68,7 @@ func (g *Pin) Detach() {
 //
 // Hopefully this tells everyone attached to start leaving
 // before explosion...
-func (g *Pin) Pull(reason Stringer) {
+func (g *Pin) Pull(reason error) {
 	g.m.Lock()
 	defer g.m.Unlock()
 
@@ -90,36 +79,22 @@ func (g *Pin) Pull(reason Stringer) {
 	select {
 	//a nil chan never gets triggered
 	//but a closed chan always does
-	case <-g.waiting:
+	case <-g.dying:
 	default:
-		g.waiting = make(chan struct{})
-		close(g.waiting)
+		g.dying = make(chan struct{})
+		close(g.dying)
 	}
 }
 
 // Tick tac motherlover !
-// Leave !!!
+// Let's stop working and start leaving.
 func (g *Pin) Tick() chan struct{} {
-	return g.waiting
-}
-
-//Calls os.Notify which will trigger ending (Pull) on selected `os.Signal`(s).
-//If you pass nil, any signal will trigger ending.
-//
-//This starts a goroutine
-func (g *Pin) Notify(sig ...os.Signal) {
-	c := make(chan os.Signal)
-	signal.Notify(c, sig...)
-	go func() {
-		for sig := range c {
-			g.Pull(sig)
-		}
-	}()
+	return g.dying
 }
 
 // Wait until everyone leaves
 // and gives the termination reason.
-func (g *Pin) Wait() Stringer {
+func (g *Pin) Wait() error {
 	g.g.Wait()
 	g.m.Lock()
 	defer g.m.Unlock()

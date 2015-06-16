@@ -31,7 +31,8 @@ type Goupille interface {
 	Add()
 
 	// Call Pull to tell everyone something went wrong
-	Pull(reason error)
+	// returns true if it's the first pull
+	Pull(reason error) bool
 
 	// if this is triggered, it means you should leave if possible
 	Tick() chan struct{}
@@ -73,9 +74,10 @@ func (g *Pin) Done() {
 
 // Pull the pin.
 //
+// Returns true if it is the first pull
 // Hopefully this tells everyone attached to start leaving
 // before explosion...
-func (g *Pin) Pull(reason error) {
+func (g *Pin) Pull(reason error) (first bool) {
 	g.m.Lock()
 	defer g.m.Unlock()
 
@@ -87,9 +89,11 @@ func (g *Pin) Pull(reason error) {
 	//a nil chan never gets triggered
 	//but a closed chan always does
 	case <-g.dying:
+		return false // it's already closed !
 	default:
 		g.dying = make(chan struct{})
 		close(g.dying)
+		return true
 	}
 }
 

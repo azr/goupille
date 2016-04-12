@@ -1,3 +1,8 @@
+Deprecated
+==========
+Warning ! I made this pkg before I knew of the context pkg.
+Even if goupille work, the net/context pkg is better solution for this.
+
 Goupille
 ========
 
